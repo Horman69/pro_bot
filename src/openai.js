@@ -31,12 +31,12 @@ class OpenAi {
 
     async transcription (filepath) { // Метод для транскрибации аудиофайлов
         try {
-            const respose = await this.openai.createTranscription( // Создание запроса на транскрибацию аудиофайла OpenAI
+            const response = await this.openai.createTranscription( // Создание запроса на транскрибацию аудиофайла OpenAI
                 createReadStream(filepath), // Чтение файла из директории
-                'gpt-3.5-turbo', // Модель для транскрибации
-                messages, // Сообщения для транскрибации
+                'whisper-1', // Модель для транскрибации
+                 // Сообщения для транскрибации
             )
-            return respose.data.text // Возвращаем текст транскрибации
+            return response.data.text // Возвращаем текст транскрибации
             await this.openai.createTranscription() // Повторно создаём запрос на транскрибацию
         } catch (e) {
             console.log(`Error while transcription`, e.message) // Логируем ошибку
