@@ -8,39 +8,60 @@ import { openai } from './openai.js'
 const INITIAL_SESSION = {
     messages: [],
 }
-
-
 const bot = new Telegraf(config.get("TELEGRAM_TOKEN"))
-
-
-// bot.command('new', (ctx) => {
-//     const buttons = [
-//         { text: 'Кнопка 1', callback_data: 'button1' },
-//         { text: 'Кнопка 2', callback_data: 'button2' },
-//         { text: 'Кнопка 3', callback_data: 'button3' },
-//         { text: 'Кнопка 4', callback_data: 'button4' },
-//     ];
-//     ctx.reply('Привет! Я pro_bot - бот с искусственным интеллектом, созданный на базе GPT-chat. Вы всегда можете сразу задать вопрос голосовым или текстовым сообщением, или выбрать нужного бота из меню', {
-//         reply_markup: {
-//         inline_keyboard: [buttons],
-//         },
-//     });
-// });
-
 bot.use(session())
 
-bot.command('new', async(ctx) => {
-    ctx.session = INITIAL_SESSION
-    await ctx.reply('Вы можете сразу задать вопрос голосовым или текстовым сообщением, или выбрать нужного бота из меню')
-})
-
 bot.command('start', async(ctx) => {
-    ctx.session = INITIAL_SESSION
-    await ctx.reply('Вы можете сразу задать вопрос голосовым или текстовым сообщением, или выбрать нужного бота из меню')
+    try {
+        ctx.session = INITIAL_SESSION
+        const buttons = [
+                    { text: 'Кнопка 1', callback_data: 'button1' },
+                    { text: 'Кнопка 2', callback_data: 'button2' },
+                    { text: 'Кнопка 3', callback_data: 'button3' },
+                    { text: 'Кнопка 4', callback_data: 'button4' },
+                ];
+                await ctx.reply('Привет! Я pro_bot - бот с искусственным интеллектом, созданный на базе GPT-chat. Вы всегда можете сразу задать вопрос голосовым или текстовым сообщением, или выбрать нужного бота из меню', {
+                    reply_markup: {
+                    inline_keyboard: [buttons],
+                    },
+                });
+    } catch (e) {
+        console.log(`Error while start message`, e.message)
+    }
 })
 
-// Отслеживаем голосовые сообщения и отправляем запрос в OpenAI API
-bot.on(message('voice'), async (ctx) => {
+// function addActionBot(name, src, text) {
+//     bot.action(name, async (ctx) => {
+//         try {
+//             await ctx.answerCbQuery()
+//             if(src !== false) {
+//                 await ctx.replyWithPhoto({
+//                     source: src
+//                 })
+//             }
+//             await ctx.replyWithHTML(text, {
+//                 disable_web_page_preview: true
+//             })
+//         } catch (e) {
+//             console.log(`Error while funcvion addActionBot`, e.message)
+//         }
+//     })
+// }
+
+// addActionBot('button1',)
+
+bot.action('button1', async (ctx) => {
+    try {
+        await ctx.answerCbQuery()
+        ctx.replyWithHTML('Кнопка 1 отработана', {
+            disable_web_page_preview: true
+        })
+    } catch (e) {
+        console.log(`Error while button1`, e.message)
+    }
+} )
+
+bot.on(message('voice'), async (ctx) => {// Отслеживаем голосовые сообщения и отправляем запрос в OpenAI API
     ctx.session ??= INITIAL_SESSION
 try {
     await ctx.reply(code('Запрос генерируется...')) // Отправляем пользователю сообщение о том, что запрос генерируется
