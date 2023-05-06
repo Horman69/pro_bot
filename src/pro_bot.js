@@ -9,7 +9,9 @@ const INITIAL_SESSION = {
     messages: [],
 }
 
+
 const bot = new Telegraf(config.get("TELEGRAM_TOKEN"))
+
 
 // bot.command('new', (ctx) => {
 //     const buttons = [
@@ -41,82 +43,47 @@ bot.command('start', async(ctx) => {
 bot.on(message('voice'), async (ctx) => {
     ctx.session ??= INITIAL_SESSION
 try {
-// Отправляем пользователю сообщение о том, что запрос генерируется
-    await ctx.reply(code('Запрос генерируется...'))
+    await ctx.reply(code('Запрос генерируется...')) // Отправляем пользователю сообщение о том, что запрос генерируется
 
-// Получаем ссылку на файл голосового сообщения
-    const link = await ctx.telegram.getFileLink(ctx.message.voice.file_id)
-// Получаем идентификатор пользователя
-    const userId = String(ctx.message.from.id)
-// Преобразуем голосовое сообщение в ogg формат
-    const oggPath = await ogg.create(link.href, userId)
-// Преобразуем ogg формат в mp3 формат
-    const mp3Path = await ogg.toMp3(oggPath, userId)
+    const link = await ctx.telegram.getFileLink(ctx.message.voice.file_id) // Получаем ссылку на файл голосового сообщения
+    const userId = String(ctx.message.from.id) // Получаем идентификатор пользователя
+    const oggPath = await ogg.create(link.href, userId) // Преобразуем голосовое сообщение в ogg формат
+    const mp3Path = await ogg.toMp3(oggPath, userId)// Преобразуем ogg формат в mp3 формат
+    const text = await openai.transcription(mp3Path) // Преобразуем голосовой текст в текстовую строку
 
-// Преобразуем голосовой текст в текстовую строку
-    const text = await openai.transcription(mp3Path)
-// Отправляем пользователю сообщение с запросом
-    await ctx.reply(code(`Ваш запрос: ${text}`))
+    await ctx.reply(code(`Ваш запрос: ${text}`)) // Отправляем пользователю сообщение с запросом
 
-// Создаем массив сообщений для отправки в OpenAI API
-    ctx.session.messages.push({ role: openai.roles.USER, content: text })
+    ctx.session.messages.push({ role: openai.roles.USER, content: text }) // Создаем массив сообщений для отправки в OpenAI API
+    
+    const response = await openai.chat(ctx.session.messages) // Отправляем сообщения в OpenAI API и получаем ответ
 
-    // Отправляем сообщения в OpenAI API и получаем ответ
-    const response = await openai.chat(ctx.session.messages)
-
-    ctx.session.messages.push = ({
+    ctx.session.messages.push({
         role: openai.roles.ASSISTANT,
         content: response.content,
     })
-
-// Отправляем пользователю ответ от OpenAI API
-    await ctx.reply(response.content)
+    await ctx.reply(response.content) // Отправляем пользователю ответ от OpenAI API
 } catch (e) {
-// Обрабатываем ошибку, если она возникла в ходе выполнения запроса
-    if (e.code === 400 && e.response && e.response.description === 'Bad Request: message text is empty') {
-// Отправляем пользователю сообщение об ошибке
-    await ctx.reply('Ошибка: Вы отправили голосовое сообщение без текстового комментария. Пожалуйста, повторите попытку и добавьте текстовый комментарий к голосовому сообщению.')
+    if (e.code === 400 && e.response && e.response.description === 'Bad Request: message text is empty') {// Обрабатываем ошибку, если она возникла в ходе выполнения запроса
+    await ctx.reply('Ошибка: Вы отправили голосовое сообщение без текстового комментария. Пожалуйста, повторите попытку и добавьте текстовый комментарий к голосовому сообщению.') // Отправляем пользователю сообщение об ошибке
     } else {
-// Логируем ошибку, если она не относится к голосовым сообщениям без текстового комментария
-    console.log(`Error while voice message`, e.message)
+    console.log(`Error while voice message`, e.message) // Логируем ошибку, если она не относится к голосовым сообщениям без текстового комментария
     }
 } 
 })
 
-// Отслеживаем текстовые сообщения и отправляем запрос в OpenAI API
-bot.on('message', async (ctx) => {
+bot.on('message', async (ctx) => {// Отслеживаем текстовые сообщения и отправляем запрос в OpenAI API
 try {
-
-// Отправляем пользователю сообщение о том, что запрос генерируется
-    await ctx.reply(code('Запрос генерируется...'))
-    
-// Получаем текст сообщения
-    const text = ctx.message.text
-
-    // Создаем массив сообщений для отправки в OpenAI API
-    const messages = [{ role: openai.roles.USER, content: text }]
-
-// Отправляем сообщения в OpenAI API и получаем ответ
-    const response = await openai.chat(messages)
-
-    // Отправляем сообщения в OpenAI API и получаем ответ
-    await ctx.reply(code(`Ваш запрос: ${text}`))
-
-// Эта строка отправляет ответ от OpenAI API пользователю в чате
-    await ctx.reply(response.content)
-    
+    await ctx.reply(code('Запрос генерируется...')) // Отправляем пользователю сообщение о том, что запрос генерируется
+    const text = ctx.message.text // Получаем текст сообщения
+    const messages = [{ role: openai.roles.USER, content: text }]// Создаем массив сообщений для отправки в OpenAI API
+    const response = await openai.chat(messages) // Отправляем сообщения в OpenAI API и получаем ответ
+    await ctx.reply(code(`Ваш запрос: ${text}`))    // Отправляем сообщения в OpenAI API и получаем ответ
+    await ctx.reply(response.content)// Эта строка отправляет ответ от OpenAI API пользователю в чате
 } catch (e) {
-    // Логируем ошибку, если что-то пошло не так при отправке текстового сообщения
-    console.log(`Error while text message`, e.message)
+    console.log(`Error while text message`, e.message)// Логируем ошибку, если что-то пошло не так при отправке текстового сообщения
 }
 })
-
-// Запускаем бота и логируем сообщение о том, что он запущен
-bot.launch()
-
-// Останавливаем бота при получении сигнала SIGINT или SIGTERM
-process.once('SIGINT', () => bot.stop('SIGINT'))
+bot.launch() // Запускаем бота и логируем сообщение о том, что он запущен
+process.once('SIGINT', () => bot.stop('SIGINT')) // Останавливаем бота при получении сигнала SIGINT или SIGTERM
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
-
-// Логируем сообщение о том, что бот запущен
-console.log(" Я живой ! ")
+console.log(" Бот запущен . . .  ") // Логируем сообщение о том, что бот запущен
