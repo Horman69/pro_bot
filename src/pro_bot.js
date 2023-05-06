@@ -64,10 +64,10 @@ try {
     // Отправляем сообщения в OpenAI API и получаем ответ
     const response = await openai.chat(ctx.session.messages)
 
-    ctx.session.messages.push = ({
+    ctx.session.messages.push({
         role: openai.roles.ASSISTANT,
         content: response.content,
-    })
+    });
 
 // Отправляем пользователю ответ от OpenAI API
     await ctx.reply(response.content)
