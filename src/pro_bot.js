@@ -29,27 +29,7 @@ bot.command('start', async(ctx) => {
         console.log(`Error while start message`, e.message)
     }
 })
-
-// function addActionBot(name, src, text) {
-//     bot.action(name, async (ctx) => {
-//         try {
-//             await ctx.answerCbQuery()
-//             if(src !== false) {
-//                 await ctx.replyWithPhoto({
-//                     source: src
-//                 })
-//             }
-//             await ctx.replyWithHTML(text, {
-//                 disable_web_page_preview: true
-//             })
-//         } catch (e) {
-//             console.log(`Error while funcvion addActionBot`, e.message)
-//         }
-//     })
-// }
-
-// addActionBot('button1',)
-
+//КНОПКА 
 bot.action('button1', async (ctx) => {
     try {
         await ctx.answerCbQuery()
@@ -59,7 +39,39 @@ bot.action('button1', async (ctx) => {
     } catch (e) {
         console.log(`Error while button1`, e.message)
     }
+})
+
+bot.action('button2', async (ctx) => {
+    try {
+        await ctx.answerCbQuery()
+        ctx.replyWithHTML('Кнопка 2 отработана', {
+            disable_web_page_preview: true
+        })
+    } catch (e) {
+        console.log(`Error while button2`, e.message)
+    }
 } )
+
+
+function addActionBot(name, src, text) {
+    bot.action(name, async (ctx) => {
+        try {
+            await ctx.answerCbQuery()
+            if(src !== false) {
+                await ctx.replyWithPhoto({
+                    source: src
+                })
+            }
+            await ctx.replyWithHTML(text, {
+                disable_web_page_preview: true
+            })
+        } catch (e) {
+            console.log(`Error while funcvion addActionBot`, e.message)
+        }
+    })
+}
+
+addActionBot('button1',)
 
 bot.on(message('voice'), async (ctx) => {// Отслеживаем голосовые сообщения и отправляем запрос в OpenAI API
     ctx.session ??= INITIAL_SESSION
