@@ -1,3 +1,5 @@
+ctx.replyWithPhoto({ source: { filename: './img./O.jpeg' } }); //отправка фото
+
 try {
 
 } catch (e) {
@@ -19,12 +21,14 @@ bot.command('start', (ctx) => {
 })
 
 bot.command('button', (ctx) => {
+
     const buttons = [
         { text: 'Кнопка 1', callback_data: 'button1' },
         { text: 'Кнопка 2', callback_data: 'button2' },
         { text: 'Кнопка 3', callback_data: 'button3' },
         { text: 'Кнопка 4', callback_data: 'button4' },
     ];
+    ctx.replyWithPhoto({ source: { filename: './img./O.jpeg' } });
     ctx.reply('Привет! Я pro_bot - бот с искусственным интеллектом, созданный на базе GPT-chat. Вы всегда можете сразу задать вопрос голосовым или текстовым сообщением, или выбрать нужного бота из меню', {
         reply_markup: {
         inline_keyboard: [buttons],

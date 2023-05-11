@@ -16,26 +16,25 @@ class OggConvector {
     }
 
 // Конвертация OGG в MP3
-    toMp3(input, ouput) {
-        try {
-            const outputPath = resolve(dirname(input), `${ouput}.mp3`) // Путь к выходному MP3-файлу
-            return new Promise((resolve, reject) => {
-                ffmpeg(input)
+toMp3(input, output) {
+    try {
+        const outputPath = resolve(dirname(input), `${output}.mp3`); // Путь к выходному MP3-файлу
+        return new Promise((resolve, reject) => {
+            ffmpeg(input)
                 .inputOption('-t 30') // обрезать до 30 секунд
                 .output(outputPath)
                 .on('end', () => {
-                    removeFile(input) // удалить исходный файл
-                    resolve(outputPath) // вернуть путь к созданному MP3
+                    
+                    removeFile(input); // Удалить исходный файл
+                    resolve(outputPath); // Вернуть путь к созданному MP3
                 })
                 .on('error', (err) => reject(err.message))
-                .run()
-            })
-        } catch (e) {
-            console.log('Error while creating mp3', e.message) //
-        }
-
+                .run();
+        });
+    } catch (e) {
+        console.log('Error while creating mp3', e.message);
     }
-
+}
 // Создание файла OGG из URL
     async create(url, filename) {
         try {
@@ -48,7 +47,8 @@ class OggConvector {
             return new Promise((resolve) => {
                 const stream = createWriteStream(oggPath) // Создать поток для записи файла
                 response.data.pipe(stream) // Записать данные из потока ответа в поток записи
-                stream.on('finish', () => resolve(oggPath)) // По завершению записи вернуть путь к созданному OGG-файлу
+                stream.on('finish', () => resolve(oggPath))// По завершению записи вернуть путь к созданному OGG-файлу
+                
             }) 
         } catch (e) {
             console.log('Error while creating ogg', e.message)  // Вывести ошибку в консоль, если что-то пошло не так
